@@ -1,0 +1,56 @@
+[
+  {
+    "id": 1,
+    "name": "Cloud headphones",
+    "category": "Electronics",
+    "price": 2499,
+    "emoji": "🎧",
+    "color": "lavender",
+    "description": "Wireless sound for your everyday"
+  },
+  {
+    "id": 2,
+    "name": "Everyday backpack",
+    "category": "Accessories",
+    "price": 1899,
+    "emoji": "🎒",
+    "color": "peach",
+    "description": "Room for everything you need"
+  },
+  {
+    "id": 3,
+    "name": "Stoneware mug",
+    "category": "Home",
+    "price": 549,
+    "emoji": "☕",
+    "color": "mint",
+    "description": "A cozy start to the morning"
+  },
+  {
+    "id": 4,
+    "name": "Desk lamp",
+    "category": "Home",
+    "price": 1299,
+    "emoji": "💡",
+    "color": "yellow",
+    "description": "A little more light for big ideas"
+  },
+  {
+    "id": 5,
+    "name": "Smart watch",
+    "category": "Electronics",
+    "price": 3299,
+    "emoji": "⌚",
+    "color": "blue",
+    "description": "Your day, at a glance"
+  },
+  {
+    "id": 6,
+    "name": "Canvas tote",
+    "category": "Accessories",
+    "price": 399,
+    "emoji": "👜",
+    "color": "pink",
+    "description": "A simple carry-all for every day"
+  }
+]

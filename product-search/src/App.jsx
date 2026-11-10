@@ -1,14 +1,5 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import "./App.css";
-
-const products = [
-  { id: 1, name: "Cloud headphones", category: "Electronics", price: 2499, emoji: "🎧", color: "lavender", badge: "Best seller", description: "Wireless sound for your everyday" },
-  { id: 2, name: "Everyday backpack", category: "Accessories", price: 1899, emoji: "🎒", color: "peach", badge: "New", description: "Room for everything you need" },
-  { id: 3, name: "Stoneware mug", category: "Home", price: 549, emoji: "☕", color: "mint", badge: "Cozy pick", description: "A cozy start to the morning" },
-  { id: 4, name: "Desk lamp", category: "Home", price: 1299, emoji: "💡", color: "yellow", badge: "Desk upgrade", description: "A little more light for big ideas" },
-  { id: 5, name: "Smart watch", category: "Electronics", price: 3299, emoji: "⌚", color: "blue", badge: "Tech pick", description: "Your day, at a glance" },
-  { id: 6, name: "Canvas tote", category: "Accessories", price: 399, emoji: "👜", color: "pink", badge: "Everyday", description: "A simple carry-all for every day" },
-];
 
 const money = (amount) =>
   new Intl.NumberFormat("en-IN", {
@@ -18,11 +9,52 @@ const money = (amount) =>
   }).format(amount);
 
 function App() {
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("All");
   const [minPrice, setMinPrice] = useState("");
   const [maxPrice, setMaxPrice] = useState("");
   const [sort, setSort] = useState("featured");
+
+  useEffect(() => {
+    let ignore = false;
+
+    async function loadProducts() {
+      try {
+        const response = await fetch("/api/products");
+
+        if (!response.ok) {
+          throw new Error(`Could not load products (${response.status})`);
+        }
+
+        const data = await response.json();
+
+        if (!ignore) {
+          setProducts(data);
+        }
+      } catch (loadError) {
+        if (!ignore) {
+          setError(
+            loadError instanceof Error
+              ? loadError.message
+              : "Could not load products."
+          );
+        }
+      } finally {
+        if (!ignore) {
+          setLoading(false);
+        }
+      }
+    }
+
+    loadProducts();
+
+    return () => {
+      ignore = true;
+    };
+  }, []);
 
   const visibleProducts = useMemo(() => {
     const term = search.trim().toLowerCase();
@@ -47,7 +79,7 @@ function App() {
         if (sort === "high") return b.price - a.price;
         return a.id - b.id;
       });
-  }, [search, category, minPrice, maxPrice, sort]);
+  }, [products, search, category, minPrice, maxPrice, sort]);
 
   function clearFilters() {
     setSearch("");
@@ -64,41 +96,15 @@ function App() {
           <span className="brand-mark">L</span>
           little market
         </a>
-
-        <div className="topbar-actions">
-          <span className="demo-label">PRODUCT SEARCH DEMO</span>
-          <button className="ghost-button" type="button">
-            Saved
-          </button>
-          <button className="shop-button" type="button">
-            Bag (0)
-          </button>
-        </div>
+        <span className="demo-label">PRODUCT SEARCH DEMO</span>
       </header>
 
       <section className="intro">
-        <div className="intro-copy-block">
-          <p className="eyebrow">A FEW GOOD FINDS</p>
-          <h1>Find your next favorite.</h1>
-          <p className="intro-copy">
-            Browse the collection and use the filters to find just the right thing.
-          </p>
-        </div>
-
-        <div className="intro-panel" aria-label="Store highlights">
-          <div>
-            <span className="panel-label">Curated</span>
-            <strong>36 fresh picks</strong>
-          </div>
-          <div>
-            <span className="panel-label">Shipping</span>
-            <strong>Free over ₹1,999</strong>
-          </div>
-          <div>
-            <span className="panel-label">Reviews</span>
-            <strong>4.9/5 rated</strong>
-          </div>
-        </div>
+        <p className="eyebrow">A FEW GOOD FINDS</p>
+        <h1>Find your next favorite.</h1>
+        <p className="intro-copy">
+          Browse the collection and use the filters to find just the right thing.
+        </p>
       </section>
 
       <section className="toolbar" aria-label="Product filters">
@@ -169,7 +175,11 @@ function App() {
           </button>
         </div>
 
-        {visibleProducts.length > 0 ? (
+        {loading ? (
+          <p>Loading products…</p>
+        ) : error ? (
+          <p role="alert">Product error: {error}</p>
+        ) : visibleProducts.length > 0 ? (
           <div className="product-grid">
             {visibleProducts.map((product) => (
               <article className="product-card" key={product.id}>
@@ -177,23 +187,13 @@ function App() {
                   className={`product-art ${product.color}`}
                   aria-hidden="true"
                 >
-                  <span className="product-emoji">{product.emoji}</span>
-                  <span className="product-badge">{product.badge}</span>
+                  <span>{product.emoji}</span>
                 </div>
                 <div className="product-info">
-                  <div className="card-meta">
-                    <p className="product-category">{product.category}</p>
-                    <span className="mini-pill">{product.badge}</span>
-                  </div>
+                  <p className="product-category">{product.category}</p>
                   <h2>{product.name}</h2>
                   <p className="product-description">{product.description}</p>
-
-                  <div className="product-footer">
-                    <p className="product-price">{money(product.price)}</p>
-                    <button className="buy-button" type="button">
-                      Add to bag
-                    </button>
-                  </div>
+                  <p className="product-price">{money(product.price)}</p>
                 </div>
               </article>
             ))}
